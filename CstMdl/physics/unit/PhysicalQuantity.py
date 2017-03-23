@@ -31,7 +31,12 @@ class PhysicalQuantity(object):
     def getMean(self):
         return self.mean
     def getQuantity(self):
+        if self.mean.figureDefined():
+            p=np.power(10,self.mean.getPrec)
+            return p*self.mean.getRoundFunc()(self.quantity/p)
         return self.quantity
+    def __call__(self):
+        return self.getQuantity()
     def getStr(self):
         return "<"+self.mean.getMean()+":"+self.unit.getName()+">"+str(self.quantity)
     def __repr__(self):

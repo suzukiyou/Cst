@@ -304,9 +304,9 @@ mAq = mH2O = PhysicalUnit(mmAq.getMul()/u.milli,"mAq")
 
 kgf_per_cm2 = PhysicalUnit(kgf.getMul()/cm.getMul()**2,"kgf/cm2")
 N_per_cm2 = PhysicalUnit(N.getMul()/cm.getMul()**2,"N/cm2")
-kN_per_cm2 = PhysicalUnit(N.getMul()/cm.getMul()**2,"N/cm2")
-N_per_mm2 = PhysicalUnit(N.getMul()/cm.getMul()**2,"N/cm2")
-kN_per_mm2 = PhysicalUnit(N.getMul()/cm.getMul()**2,"N/cm2")
+kN_per_cm2 = PhysicalUnit(kN.getMul()/cm.getMul()**2,"kN/cm2")
+N_per_mm2 = PhysicalUnit(N.getMul()/mm.getMul()**2,"N/mm2")
+kN_per_mm2 = PhysicalUnit(kN.getMul()/mm.getMul()**2,"kN/mm2")
 
 #common degree unit
 degF = PhysicalUnit(1.8*u.K,"degF")
