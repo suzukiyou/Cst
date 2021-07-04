@@ -304,6 +304,10 @@ class Section(object):
     def set_pipe(self,pipe):
         self.pipe=pipe
         return self
+    def set_partsEnumerator(self,enum):
+        self.partsEnumerator=enum
+        enum.section=self
+        return self
     def calc_Q(self,fluxUnit=1):
         self.Q=self.flux*fluxUnit
         return self
@@ -318,8 +322,12 @@ class Section(object):
         self.f=self.resultf.x[0]
         return self
     def calc_unitPr(self):
-        unitPr=self.f/self.D*self.v**2*self.fluid.rho/2.
+        self.Pv=self.v**2*self.fluid.rho/2.
+        unitPr=self.f/self.D*self.Pv
         self.unitPr=unitPr
+        return self
+    def calc_Pr(self):
+        self.totalPr=self.partsEnumerator.calc_Pr()
         return self
 
     def __repr__(self):
@@ -327,7 +335,80 @@ class Section(object):
             return "<Section: {} :D={:.3f}>".format(self.edge.toString(),self.D)
         else:
             return "<Section: {} :D={:.3f} :Q={:.3f}>".format(self.edge.toString(),self.D,self.flux)
-    
+
+class PartsEnumerator(object):
+    pass
+
+class PartsEnumeratorList(PartsEnumerator):
+    def __init__(self):
+        self.partsList=[]
+    def add_part(self,part):
+        self.partsList.append(part)
+        part.section=self.section
+    def calc_Pr(self):
+        self.PrList=[part.Pr for part in self.partsList]
+        return np.sum(self.PrList)
+
+class PartsEnumeratorQuantity(PartsEnumerator):
+    def __init__(self):
+        self.partsDict=OrderedDict()
+    def add_part(self,part,quantity):
+        self.partsDict[part.name]=[part,quantity]
+        part.section=self.section
+    def calc_Pr(self):
+        self.PrList=[]
+        for name in self.partsDict:
+            valueList=self.partsDict[name]
+            part=valueList[0]
+            quantity=valueList[1]
+            self.PrList.append(part.Pr*quantity)
+        return np.sum(self.PrList)
+
+class Part(object):
+    def __init__(self,name=""):
+        self.name=name
+    def set_section(self,section):
+        self.section=section
+    @property
+    def length(self):
+        raise
+    @property
+    def Pr(self):
+        raise
+
+class PartPipe(Part):
+    def __init__(self,name,l):
+        self.name=name
+        self.l=l
+    @property
+    def length(self):
+        return self.l
+    @property
+    def Pr(self):
+        return self.length*self.section.unitPr
+
+class PartJointZeta(Part):
+    def __init__(self,name,zeta):
+        self.name=name
+        self.zeta=zeta
+    @property
+    def length(self):
+        return self.Pr/self.section.unitPr
+    @property
+    def Pr(self):
+        return self.section.Pv*self.zeta
+
+class PartJointEffectiveLength(Part):
+    def __init__(self,name,l):
+        self.name=name
+        self.l=l
+    @property
+    def length(self):
+        return self.l
+    @property
+    def Pr(self):
+        return self.section.unitPr*self.l
+
 
 if __name__=="__main__":
     g=Graph("g1")
